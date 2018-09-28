@@ -1,28 +1,204 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+  <div>
+      <div class="img-wrapper">
+        <img
+          src="https://unsplash.it/960/600"
+        />
+        <players
+          v-for="(player, number) in players"
+          :key="number"
+          :player="player"
+        />
+      </div>
+    </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import lspi from 'lspi';
+import Handler from './sockets';
+import Players from './components/Players.vue'
 
 export default {
   name: 'app',
   components: {
-    HelloWorld
-  }
-}
+    Players
+  },
+  data() {
+    const id = lspi.get('id') || new Date().getTime();
+
+    lspi.set('id', id);
+
+    const socket = new Handler();
+    
+    socket.channel.join();
+
+    return {
+      id,
+      socket,
+      players: [],
+    };
+  },
+  created() {
+    window.addEventListener('keydown', (e) => this.handleKeyMoves(e));
+
+    this.socket.onSub(({ sub, pub }) => {
+      this.$nextTick(() => {
+        requestAnimationFrame(() => {
+          this.handleSubStream(sub);
+          this.handlePubStream(pub);
+        })
+      });
+    });
+
+    this.socket.sub({ body: { key: '1' } });
+  },
+  methods: {
+    createPlayer() {
+      return {
+        id: this.id,
+        x: (Math.random() * 100),
+        y: (Math.random() * 100),
+      };
+    },
+    setPlayersAndAddSelf(dataSet) {
+      this.players = dataSet.data.players;
+
+      const id = this.id;
+      const player = this.players.find(player => player.id === id);
+
+      if (!player) {
+        const newPlayers = [...this.players, this.createPlayer()];
+
+        this.socket.pub({
+          body: {
+            key: '1',
+            data: {
+              players: newPlayers,
+            },
+          }
+        });
+      }
+    },
+    handleSubStream(sub) {
+      if (sub) {
+        if (sub.data === null) {
+          this.socket.pub({
+            body: {
+              key: '1',
+              data: {
+                players: [this.createPlayer()],
+              },
+            }
+          });
+        } else {
+          this.setPlayersAndAddSelf(sub);
+        }
+      }
+    },
+    handlePubStream(pub) {
+      if (pub) {
+        if (pub.data.players.length) {
+          this.setPlayersAndAddSelf(pub);
+        } else {
+          const newPlayers = [this.createPlayer()];
+  
+          this.socket.pub({
+            body: {
+              key: '1',
+              data: {
+                players: newPlayers,
+              },
+            }
+          });
+        }
+      }
+    },
+    handleKeyMoves(e) {
+      const horizontalVelocity = 0.5;
+      const verticalVelocity = 0.9;
+
+      const id = this.id;
+      const player = [...this.players].find(player => player.id === id);
+
+      switch (e.keyCode) {
+        case 37:
+          player.x -= horizontalVelocity;
+          break;
+        case 38:
+          player.y -= verticalVelocity;
+          break;
+        case 39:
+          player.x += horizontalVelocity;
+          break;
+        case 40:
+          player.y += verticalVelocity;
+          break;
+      }
+
+      const { players } = this;
+
+      this.socket.pub({
+        body: {
+          key: '1',
+          data: {
+            players,
+          },
+        }
+      });
+    },
+    repeatOften() {
+      requestAnimationFrame(this.repeatOften);
+    },
+    ready() {
+      this.repeatOften();
+    },
+  },
+};
 </script>
 
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+body {
+  margin: 0;
+}
+
+body > div {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background: #f2f2f2;
+}
+
+.img-wrapper {
+  position: relative;
+  max-width: 80%;
+  margin: auto;
+  border: 1rem solid #fff;
+  background-color: white;
+}
+
+.img-wrapper > img {
+  display: block;
+  max-width: 100%;
+}
+
+.player {
+  position: absolute;
+  width: 0;
+  height: 0;
+  transform: translate(-50%, -50%);
+}
+
+.dialogue {
+  color: white;
+  text-shadow: 1px 1px black;
+  margin: 0;
+  z-index: 100;
+}
+
+.dialogue-box {
+  background-color: grey;
+  width: 100px;
+  border: 1px solid black;
+  padding: 5px;
 }
 </style>
