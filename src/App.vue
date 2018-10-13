@@ -24,9 +24,7 @@ export default {
     Players
   },
   data() {
-    const id = lspi.get('id') || new Date().getTime();
-
-    lspi.set('id', id);
+    const id = new Date().getTime();
 
     const socket = new Handler();
     
@@ -42,12 +40,8 @@ export default {
     window.addEventListener('keydown', (e) => this.handleKeyMoves(e));
 
     this.socket.onSub(({ sub, pub }) => {
-      this.$nextTick(() => {
-        requestAnimationFrame(() => {
-          this.handleSubStream(sub);
-          this.handlePubStream(pub);
-        })
-      });
+      this.handleSubStream(sub);
+      this.handlePubStream(pub);
     });
 
     this.socket.sub({ body: { key: '1' } });
@@ -60,14 +54,12 @@ export default {
         y: (Math.random() * 100),
       };
     },
-    setPlayersAndAddSelf(dataSet) {
-      this.players = dataSet.data.players;
-
+    updatePlayerData(dataSet) {
       const id = this.id;
-      const player = this.players.find(player => player.id === id);
+      const player = dataSet.data.players.find(player => player.id === id);
 
       if (!player) {
-        const newPlayers = [...this.players, this.createPlayer()];
+        const newPlayers = [...dataSet.data.players, this.createPlayer()];
 
         this.socket.pub({
           body: {
@@ -77,6 +69,8 @@ export default {
             },
           }
         });
+      } else {
+        this.players = dataSet.data.players.map(e => e.id === id ? player : e)
       }
     },
     handleSubStream(sub) {
@@ -91,22 +85,20 @@ export default {
             }
           });
         } else {
-          this.setPlayersAndAddSelf(sub);
+          this.updatePlayerData(sub);
         }
       }
     },
     handlePubStream(pub) {
       if (pub) {
         if (pub.data.players.length) {
-          this.setPlayersAndAddSelf(pub);
+          this.updatePlayerData(pub);
         } else {
-          const newPlayers = [this.createPlayer()];
-  
           this.socket.pub({
             body: {
               key: '1',
               data: {
-                players: newPlayers,
+                players: [this.createPlayer()],
               },
             }
           });
@@ -118,7 +110,7 @@ export default {
       const verticalVelocity = 0.9;
 
       const id = this.id;
-      const player = [...this.players].find(player => player.id === id);
+      const player = this.players.find(player => player.id === id);
 
       switch (e.keyCode) {
         case 37:
@@ -145,12 +137,6 @@ export default {
           },
         }
       });
-    },
-    repeatOften() {
-      requestAnimationFrame(this.repeatOften);
-    },
-    ready() {
-      this.repeatOften();
     },
   },
 };
