@@ -42,8 +42,8 @@ export default {
     window.addEventListener('keydown', (e) => this.handleKeyMoves(e));
 
     this.socket.onSub(({ sub, pub }) => {
-      this.$nextTick(() => {
-        requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.$nextTick(() => {
           this.handleSubStream(sub);
           this.handlePubStream(pub);
         });
@@ -139,19 +139,17 @@ export default {
           break;
       }
 
-      this.$nextTick(() => {
-        const players = this.players.map(pl => pl.id === id ? self : pl);
+      const players = this.players.map(pl => pl.id === id ? self : pl);
 
-        this.players = players;
+      this.players = players;
 
-        this.socket.pub({
-          body: {
-            key: '1',
-            data: {
-              players,
-            },
-          }
-        });
+      this.socket.pub({
+        body: {
+          key: '1',
+          data: {
+            players,
+          },
+        }
       });
     },
   },
