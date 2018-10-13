@@ -119,16 +119,16 @@ export default {
 
       switch (keyCode) {
         case 37:
-          me.x -= horizontalVelocity;
+          player.x -= horizontalVelocity;
           break;
         case 38:
-          me.y -= verticalVelocity;
+          player.y -= verticalVelocity;
           break;
         case 39:
-          me.x += horizontalVelocity;
+          player.x += horizontalVelocity;
           break;
         case 40:
-          me.y += verticalVelocity;
+          player.y += verticalVelocity;
           break;
       }
 
