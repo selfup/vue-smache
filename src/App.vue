@@ -36,6 +36,7 @@ export default {
       id,
       socket,
       players: [],
+      enemys: [],
     };
   },
   created() {
@@ -63,17 +64,19 @@ export default {
       if (!me) {
         this.players = [...players, this.createPlayer()];
 
-        this.socket.pub({
-          body: {
-            key: '1',
-            data: {
-              players: this.players,
-            },
-          }
+        this.nextTick(() => {
+          this.socket.pub({
+            body: {
+              key: '1',
+              data: {
+                players: this.players,
+              },
+            }
+          });
         });
       } else {
         this.$nextTick(() => {
-          this.players = players.map(pl => pl.id === id ? me : pl)
+          this.players = players.map(pl => pl.id === id)
         });
       }
     },
@@ -132,20 +135,20 @@ export default {
           break;
       }
 
-    this.players = this.players.map(pl => pl.id === me.id ? me : pl);
+      this.players = this.players.map(pl => pl.id === me.id ? me : pl);
 
-    const { players } = this;
+      const { players } = this;
 
-    this.$nextTick(() => {
-      this.socket.pub({
-        body: {
-          key: '1',
-          data: {
-            players,
-          },
-        }
+      this.$nextTick(() => {
+        this.socket.pub({
+          body: {
+            key: '1',
+            data: {
+              players,
+            },
+          }
+        });
       });
-    });
     },
   },
 };
