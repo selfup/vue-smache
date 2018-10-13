@@ -72,7 +72,9 @@ export default {
           }
         });
       } else {
-        this.players = players.map(pl => pl.id === id ? me : pl)
+        this.$nextTick(() => {
+          this.players = players.map(pl => pl.id === id ? me : pl)
+        });
       }
     },
     handleSubStream(sub) {
