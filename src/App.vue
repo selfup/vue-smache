@@ -42,9 +42,11 @@ export default {
     window.addEventListener('keydown', (e) => this.handleKeyMoves(e));
 
     this.socket.onSub(({ sub, pub }) => {
-      requestAnimationFrame(() => {
-        this.handleSubStream(sub);
-        this.handlePubStream(pub);
+      this.$nextTick(() => {
+        requestAnimationFrame(() => {
+          this.handleSubStream(sub);
+          this.handlePubStream(pub);
+        });
       });
     });
 
@@ -58,34 +60,26 @@ export default {
         y: (Math.random() * 100),
       };
     },
-    setPlayersAndAddSelf(dataSet) {
+    updatePlayerState({ data: { players } }) {
       const id = this.id;
 
-      const player = dataSet
-        .data.players.find(player => player.id === id);
+      const self = players.find(pl => pl.id === id);
 
-      if (!player) {
+      if (!self) {
         const newPlayers = [...this.players, this.createPlayer()];
 
-        this.nextTick(() => {
-          this.players = newPlayers;
+        this.players = newPlayers;
 
-          this.socket.pub({
-            body: {
-              key: '1',
-              data: {
-                players: newPlayers,
-              },
-            }
-          });
+        this.socket.pub({
+          body: {
+            key: '1',
+            data: {
+              players: newPlayers,
+            },
+          }
         });
       } else {
-        const incomingPlayerData = dataSet
-          .data.players.filter(player => player.id !== id);
-
-        this.$nextTick(() => {
-          this.players = [player, ...incomingPlayerData];
-        });
+        this.players = players.map(pl => pl.id === id ? self : pl);
       }
     },
     handleSubStream(sub) {
@@ -94,65 +88,70 @@ export default {
           this.socket.pub({
             body: {
               key: '1',
+              playerId: this.id,
               data: {
                 players: [this.createPlayer()],
               },
             }
           });
         } else {
-          this.setPlayersAndAddSelf(sub);
+          this.updatePlayerState(sub);
         }
       }
     },
     handlePubStream(pub) {
       if (pub) {
         if (pub.data.players.length) {
-          this.setPlayersAndAddSelf(pub);
+          this.updatePlayerState(pub);
         } else {
-          const newPlayers = [this.createPlayer()];
+          const players = [this.createPlayer()];
   
           this.socket.pub({
             body: {
               key: '1',
               data: {
-                players: newPlayers,
+                players,
               },
             }
           });
         }
       }
     },
-    handleKeyMoves(e) {
+    handleKeyMoves({ keyCode }) {
       const horizontalVelocity = 0.5;
       const verticalVelocity = 0.9;
 
       const id = this.id;
-      const player = this.players.find(player => player.id === id);
+      const self = [...this.players].find(pl => pl.id === id);
 
-      switch (e.keyCode) {
+      switch (keyCode) {
         case 37:
-          player.x -= horizontalVelocity;
+          self.x -= horizontalVelocity;
           break;
         case 38:
-          player.y -= verticalVelocity;
+          self.y -= verticalVelocity;
           break;
         case 39:
-          player.x += horizontalVelocity;
+          self.x += horizontalVelocity;
           break;
         case 40:
-          player.y += verticalVelocity;
+          self.y += verticalVelocity;
           break;
       }
 
-      const { players } = this;
+      this.$nextTick(() => {
+        const players = this.players.map(pl => pl.id === id ? self : pl);
 
-      this.socket.pub({
-        body: {
-          key: '1',
-          data: {
-            players,
-          },
-        }
+        this.players = players;
+
+        this.socket.pub({
+          body: {
+            key: '1',
+            data: {
+              players,
+            },
+          }
+        });
       });
     },
   },
