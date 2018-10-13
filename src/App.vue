@@ -61,9 +61,9 @@ export default {
     updatePlayerState({ data: { players } }) {
       const id = this.id;
 
-      const self = players.find(pl => pl.id === id);
+      const me = players.find(pl => pl.id === id);
 
-      if (!self) {
+      if (!me) {
         const newPlayers = [...this.players, this.createPlayer()];
 
         this.players = newPlayers;
@@ -77,7 +77,7 @@ export default {
           }
         });
       } else {
-        this.players = players.map(pl => pl.id === id ? self : pl);
+        this.players = players.map(pl => pl.id === id ? me : pl);
       }
     },
     handleSubStream(sub) {
@@ -120,20 +120,20 @@ export default {
       const verticalVelocity = 0.9;
 
       const id = this.id;
-      const self = this.players.find(pl => pl.id === id);
+      const me = this.players.find(pl => pl.id === id);
 
       switch (keyCode) {
         case 37:
-          self.x -= horizontalVelocity;
+          me.x -= horizontalVelocity;
           break;
         case 38:
-          self.y -= verticalVelocity;
+          me.y -= verticalVelocity;
           break;
         case 39:
-          self.x += horizontalVelocity;
+          me.x += horizontalVelocity;
           break;
         case 40:
-          self.y += verticalVelocity;
+          me.y += verticalVelocity;
           break;
       }
 
