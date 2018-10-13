@@ -72,7 +72,9 @@ export default {
           }
         });
       } else {
-        this.players = players.map(pl => pl.id === id ? me : pl)
+        this.$nextTick(() => {
+          this.players = players.map(pl => pl.id === id ? me : pl)
+        });
       }
     },
     handleSubStream(sub) {
@@ -130,8 +132,11 @@ export default {
           break;
       }
 
-     const { players } = this;
+    this.players = this.players.map(pl => pl.id === me.id ? me : pl);
 
+    const { players } = this;
+
+    this.$nextTick(() => {
       this.socket.pub({
         body: {
           key: '1',
@@ -140,6 +145,7 @@ export default {
           },
         }
       });
+    });
     },
   },
 };
