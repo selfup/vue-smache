@@ -56,25 +56,23 @@ export default {
         y: (Math.random() * 100),
       };
     },
-    updatePlayerData(dataSet) {
+    updatePlayerData({ data: { players = [] } }) {
       const id = this.id;
-      const player = dataSet.data.players.find(player => player.id === id);
+      const me = players.find(pl => pl.id === id);
 
-      if (!player) {
-        const newPlayers = [...dataSet.data.players, this.createPlayer()];
-
-        this.players = newPlayers;
+      if (!me) {
+        this.players = [...players, this.createPlayer()];
 
         this.socket.pub({
           body: {
             key: '1',
             data: {
-              players: newPlayers,
+              players: this.players,
             },
           }
         });
       } else {
-        this.players = dataSet.data.players.map(e => e.id === id ? player : e)
+        this.players = players.map(pl => pl.id === id ? me : pl)
       }
     },
     handleSubStream(sub) {
@@ -115,20 +113,20 @@ export default {
       const verticalVelocity = 0.9;
 
       const id = this.id;
-      const player = this.players.find(player => player.id === id);
+      const me = this.players.find(pl => pl.id === id);
 
       switch (keyCode) {
         case 37:
-          player.x -= horizontalVelocity;
+          me.x -= horizontalVelocity;
           break;
         case 38:
-          player.y -= verticalVelocity;
+          me.y -= verticalVelocity;
           break;
         case 39:
-          player.x += horizontalVelocity;
+          me.x += horizontalVelocity;
           break;
         case 40:
-          player.y += verticalVelocity;
+          me.y += verticalVelocity;
           break;
       }
 
