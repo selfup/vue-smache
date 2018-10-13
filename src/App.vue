@@ -63,6 +63,8 @@ export default {
       if (!player) {
         const newPlayers = [...dataSet.data.players, this.createPlayer()];
 
+        this.players = newPlayers;
+
         this.socket.pub({
           body: {
             key: '1',
@@ -81,6 +83,7 @@ export default {
           this.socket.pub({
             body: {
               key: '1',
+              playerId: this.id,
               data: {
                 players: [this.createPlayer()],
               },
@@ -107,29 +110,29 @@ export default {
         }
       }
     },
-    handleKeyMoves(e) {
+    handleKeyMoves({ keyCode }) {
       const horizontalVelocity = 0.5;
       const verticalVelocity = 0.9;
 
       const id = this.id;
       const player = this.players.find(player => player.id === id);
 
-      switch (e.keyCode) {
+      switch (keyCode) {
         case 37:
-          player.x -= horizontalVelocity;
+          me.x -= horizontalVelocity;
           break;
         case 38:
-          player.y -= verticalVelocity;
+          me.y -= verticalVelocity;
           break;
         case 39:
-          player.x += horizontalVelocity;
+          me.x += horizontalVelocity;
           break;
         case 40:
-          player.y += verticalVelocity;
+          me.y += verticalVelocity;
           break;
       }
 
-      const { players } = this;
+     const { players } = this;
 
       this.socket.pub({
         body: {
