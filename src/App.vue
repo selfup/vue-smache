@@ -77,7 +77,7 @@ export default {
           }
         });
       } else {
-        this.players = players.map(pl => pl.id === id ? me : pl);
+        this.players = [...players.filter(pl => pl.id !== id), me];
       }
     },
     handleSubStream(sub) {
