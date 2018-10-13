@@ -85,7 +85,7 @@ export default {
         const incomingPlayerData = dataSet
           .data.players.filter(player => player.id !== id);
 
-        this.$nexTick(() => {
+        this.$nextTick(() => {
           this.players = [player, ...incomingPlayerData];
         });
       }
