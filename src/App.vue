@@ -75,7 +75,7 @@ export default {
         });
       } else {
         this.$nextTick(() => {
-          this.players = players.map(pl => pl.id === id)
+          this.players = players.filter(pl => pl.id === id ? me : pl);
         });
       }
     },
