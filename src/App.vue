@@ -61,13 +61,15 @@ export default {
       };
     },
     setPlayersAndAddSelf(dataSet) {
-      this.players = dataSet.data.players;
-
       const id = this.id;
-      const player = this.players.find(player => player.id === id);
+
+      const player = dataSet
+        .data.players.find(player => player.id === id);
 
       if (!player) {
         const newPlayers = [...this.players, this.createPlayer()];
+
+        this.players = newPlayers;
 
         this.socket.pub({
           body: {
@@ -77,6 +79,11 @@ export default {
             },
           }
         });
+      } else {
+        const incomingPlayerData = dataSet
+          .data.players.filter(player => player.id !== id);
+
+        this.players = [player, ...incomingPlayerData];
       }
     },
     handleSubStream(sub) {
@@ -118,7 +125,7 @@ export default {
       const verticalVelocity = 0.9;
 
       const id = this.id;
-      const player = [...this.players].find(player => player.id === id);
+      const player = this.players.find(player => player.id === id);
 
       switch (e.keyCode) {
         case 37:
@@ -145,12 +152,6 @@ export default {
           },
         }
       });
-    },
-    repeatOften() {
-      requestAnimationFrame(this.repeatOften);
-    },
-    ready() {
-      this.repeatOften();
     },
   },
 };
