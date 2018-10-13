@@ -36,7 +36,6 @@ export default {
       id,
       socket,
       players: [],
-      enemys: [],
     };
   },
   created() {
@@ -134,8 +133,6 @@ export default {
           me.y += verticalVelocity;
           break;
       }
-
-      this.players = this.players.map(pl => pl.id === me.id ? me : pl);
 
       const { players } = this;
 
