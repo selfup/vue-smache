@@ -42,8 +42,10 @@ export default {
     window.addEventListener('keydown', (e) => this.handleKeyMoves(e));
 
     this.socket.onSub(({ sub, pub }) => {
-      this.handleSubStream(sub);
-      this.handlePubStream(pub);
+      requestAnimationFrame(() => {
+        this.handleSubStream(sub);
+        this.handlePubStream(pub);
+      });
     });
 
     this.socket.sub({ body: { key: '1' } });
