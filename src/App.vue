@@ -120,7 +120,7 @@ export default {
       const verticalVelocity = 0.9;
 
       const id = this.id;
-      const self = [...this.players].find(pl => pl.id === id);
+      const self = this.players.find(pl => pl.id === id);
 
       switch (keyCode) {
         case 37:
@@ -137,9 +137,7 @@ export default {
           break;
       }
 
-      const players = this.players.map(pl => pl.id === id ? self : pl);
-
-      this.players = players;
+     const { players } = this;
 
       this.socket.pub({
         body: {
