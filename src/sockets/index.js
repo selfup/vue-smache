@@ -6,7 +6,7 @@ const SUB = 'game_sub';
 export default class Handler {
   constructor(channel = 'room:game') {
     const smache = process.env.NODE_ENV === 'production'
-      ? 'https://thawing-reef-15819.herokuapp.com/'
+      ? 'ws://thawing-reef-15819.herokuapp.com/'
       : 'ws://localhost:4000/socket';
     
     const socket = new Socket(smache, {});
