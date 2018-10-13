@@ -42,10 +42,8 @@ export default {
     window.addEventListener('keydown', (e) => this.handleKeyMoves(e));
 
     this.socket.onSub(({ sub, pub }) => {
-      requestAnimationFrame(() => {
-        this.handleSubStream(sub);
-        this.handlePubStream(pub);
-      });
+      this.handleSubStream(sub);
+      this.handlePubStream(pub);
     });
 
     this.socket.sub({ body: { key: '1' } });
@@ -58,13 +56,12 @@ export default {
         y: (Math.random() * 100),
       };
     },
-    updatePlayerState({ data: { players } }) {
+    updatePlayerData(dataSet) {
       const id = this.id;
+      const player = dataSet.data.players.find(player => player.id === id);
 
-      const me = players.find(pl => pl.id === id);
-
-      if (!me) {
-        const newPlayers = [...this.players, this.createPlayer()];
+      if (!player) {
+        const newPlayers = [...dataSet.data.players, this.createPlayer()];
 
         this.players = newPlayers;
 
@@ -77,7 +74,7 @@ export default {
           }
         });
       } else {
-        this.players = [...players.filter(pl => pl.id !== id), me];
+        this.players = dataSet.data.players.map(e => e.id === id ? player : e)
       }
     },
     handleSubStream(sub) {
@@ -93,22 +90,20 @@ export default {
             }
           });
         } else {
-          this.updatePlayerState(sub);
+          this.updatePlayerData(sub);
         }
       }
     },
     handlePubStream(pub) {
       if (pub) {
         if (pub.data.players.length) {
-          this.updatePlayerState(pub);
+          this.updatePlayerData(pub);
         } else {
-          const players = [this.createPlayer()];
-  
           this.socket.pub({
             body: {
               key: '1',
               data: {
-                players,
+                players: [this.createPlayer()],
               },
             }
           });
@@ -120,7 +115,7 @@ export default {
       const verticalVelocity = 0.9;
 
       const id = this.id;
-      const me = this.players.find(pl => pl.id === id);
+      const player = this.players.find(player => player.id === id);
 
       switch (keyCode) {
         case 37:
