@@ -134,13 +134,15 @@ export default {
 
      const { players } = this;
 
-      this.socket.pub({
-        body: {
-          key: '1',
-          data: {
-            players,
-          },
-        }
+      this.$nextTick(() => {
+        this.socket.pub({
+          body: {
+            key: '1',
+            data: {
+              players,
+            },
+          }
+        });
       });
     },
   },
