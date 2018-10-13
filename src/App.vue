@@ -43,10 +43,8 @@ export default {
 
     this.socket.onSub(({ sub, pub }) => {
       requestAnimationFrame(() => {
-        this.$nextTick(() => {
-          this.handleSubStream(sub);
-          this.handlePubStream(pub);
-        });
+        this.handleSubStream(sub);
+        this.handlePubStream(pub);
       });
     });
 
