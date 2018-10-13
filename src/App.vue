@@ -69,21 +69,25 @@ export default {
       if (!player) {
         const newPlayers = [...this.players, this.createPlayer()];
 
-        this.players = newPlayers;
+        this.nextTick(() => {
+          this.players = newPlayers;
 
-        this.socket.pub({
-          body: {
-            key: '1',
-            data: {
-              players: newPlayers,
-            },
-          }
+          this.socket.pub({
+            body: {
+              key: '1',
+              data: {
+                players: newPlayers,
+              },
+            }
+          });
         });
       } else {
         const incomingPlayerData = dataSet
           .data.players.filter(player => player.id !== id);
 
-        this.players = [player, ...incomingPlayerData];
+        this.$nexTick(() => {
+          this.players = [player, ...incomingPlayerData];
+        });
       }
     },
     handleSubStream(sub) {
