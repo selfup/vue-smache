@@ -24,7 +24,9 @@ export default {
     Players
   },
   data() {
-    const id = new Date().getTime();
+    const id = lspi.get('id') || new Date().getTime();
+
+    lspi.set('id', id);
 
     const socket = new Handler();
     
