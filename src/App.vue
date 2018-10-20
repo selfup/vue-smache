@@ -72,9 +72,7 @@ export default {
           },
         });
       } else {
-        this.$nextTick(() => {
-          this.players = players.map(pl => (pl.id === id ? me : pl));
-        });
+        this.players = players.map(pl => (pl.id === id ? me : pl));
       }
     },
     handleSubStream(sub) {
@@ -111,36 +109,38 @@ export default {
       }
     },
     handleKeyMoves({ keyCode }) {
-      const horizontalVelocity = 0.5;
-      const verticalVelocity = 0.9;
+      requestAnimationFrame(() => {
+        const horizontalVelocity = 0.5;
+        const verticalVelocity = 0.9;
 
-      const id = this.id;
-      const me = this.players.find(pl => pl.id === id);
+        const id = this.id;
+        const me = this.players.find(pl => pl.id === id);
 
-      switch (keyCode) {
-        case 37:
-          me.x -= horizontalVelocity;
-          break;
-        case 38:
-          me.y -= verticalVelocity;
-          break;
-        case 39:
-          me.x += horizontalVelocity;
-          break;
-        case 40:
-          me.y += verticalVelocity;
-          break;
-      }
+        switch (keyCode) {
+          case 37:
+            me.x -= horizontalVelocity;
+            break;
+          case 38:
+            me.y -= verticalVelocity;
+            break;
+          case 39:
+            me.x += horizontalVelocity;
+            break;
+          case 40:
+            me.y += verticalVelocity;
+            break;
+        }
 
-      const { players } = this;
+        const { players } = this;
 
-      this.socket.pub({
-        body: {
-          key: '1',
-          data: {
-            players,
+        this.socket.pub({
+          body: {
+            key: '1',
+            data: {
+              players,
+            },
           },
-        },
+        });
       });
     },
   },
@@ -174,8 +174,6 @@ body > div {
 
 .player {
   position: absolute;
-  width: 0;
-  height: 0;
   transform: translate(-50%, -50%);
 }
 

@@ -1,42 +1,13 @@
 <template>
-  <div class="player" :style="ratioStyle">
-    <svg width="60" height="60" viewBox="1 10 78 58">
-      <polygon :points="points"></polygon>
-    </svg>
-  </div>
+  <svg class="player" :style="ratioStyle" width="60" height="60" viewBox="1 10 78 58">
+    <polygon :points="points"></polygon>
+  </svg>
 </template>
 
 <script>
 import { TweenLite } from 'gsap/TweenLite';
 
-function valueToPoint(value, index, total) {
-  const x = 0;
-  const y = -value * 0.35;
-
-  const angle = ((Math.PI * 2) / total) * index;
-
-  const cos = Math.cos(angle);
-  const sin = Math.sin(angle);
-
-  const tx = x * cos - y * sin + 40;
-  const ty = x * sin + y * cos + 40;
-
-  return { x: tx, y: ty };
-}
-
-function generatePoints(stats) {
-  const total = stats.length;
-
-  return stats
-    .map((stat, index) => {
-      const point = valueToPoint(stat, index, total);
-
-      return point.x + ',' + point.y;
-    })
-    .join(' ');
-}
-
-export default {
+const Players = {
   name: 'player',
   props: {
     player: {
@@ -112,12 +83,39 @@ export default {
     },
   },
 };
+
+function valueToPoint(value, index, total) {
+  const x = 0;
+  const y = -value * 0.35;
+
+  const angle = ((Math.PI * 2) / total) * index;
+
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+
+  const tx = x * cos - y * sin + 40;
+  const ty = x * sin + y * cos + 40;
+
+  return { x: tx, y: ty };
+}
+
+function generatePoints(stats) {
+  const total = stats.length;
+
+  return stats
+    .map((stat, index) => {
+      const point = valueToPoint(stat, index, total);
+
+      return point.x + ',' + point.y;
+    })
+    .join(' ');
+}
+
+export default Players;
 </script>
 
 <style scoped=true>
 svg {
-  border-radius: 45px;
-  background-color: lightcoral;
   display: inline-block;
 }
 
