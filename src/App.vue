@@ -42,8 +42,7 @@ export default {
     window.addEventListener('keydown', e => this.handleKeyMoves(e));
 
     this.socket.onSub(({ sub, pub }) => {
-      this.handleSubStream(sub);
-      this.handlePubStream(pub);
+      sub ? this.updatePlayerData(sub) : this.updatePlayerData(pub);
     });
 
     this.socket.sub({ body: { key: '1' } });
@@ -61,55 +60,34 @@ export default {
       const me = players.find(pl => pl.id === id);
 
       if (!me) {
-        this.players = [...players, this.createPlayer()];
+        players.push(this.createPlayer());
+
+        this.players = players;
 
         this.socket.pub({
           body: {
             key: '1',
             data: {
-              players: this.players,
+              players,
             },
           },
         });
       } else {
-        this.players = players.map(pl => (pl.id === id ? me : pl));
-      }
-    },
-    handleSubStream(sub) {
-      if (sub) {
-        if (sub.data === null) {
-          this.socket.pub({
-            body: {
-              key: '1',
-              playerId: this.id,
-              data: {
-                players: [this.createPlayer()],
-              },
-            },
-          });
-        } else {
-          this.updatePlayerData(sub);
-        }
-      }
-    },
-    handlePubStream(pub) {
-      if (pub) {
-        if (pub.data.players.length) {
-          this.updatePlayerData(pub);
-        } else {
-          this.socket.pub({
-            body: {
-              key: '1',
-              data: {
-                players: [this.createPlayer()],
-              },
-            },
-          });
-        }
+        this.$nextTick(() => {
+          const entities = players.filter(pl => pl.id !== id);
+
+          entities.push(me);
+
+          this.players = entities;
+        });
       }
     },
     handleKeyMoves({ keyCode }) {
       requestAnimationFrame(() => {
+        if (keyCode < 37 || keyCode > 40) {
+          return null;
+        }
+
         const horizontalVelocity = 0.5;
         const verticalVelocity = 0.9;
 
