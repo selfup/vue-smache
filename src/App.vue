@@ -4,10 +4,11 @@
         <img
           src="https://unsplash.it/960/600"
         />
-        <players
-          v-for="(player, number) in players"
-          :key="number"
+        <Player
+          v-for="player in players"
+          :key="player.id"
           :player="player"
+          :myId="id"
         />
       </div>
     </div>
@@ -16,12 +17,12 @@
 <script>
 import lspi from 'lspi';
 import Handler from './sockets';
-import Players from './components/Players.vue';
+import Player from './components/Player.vue';
 
 export default {
   name: 'app',
   components: {
-    Players,
+    Player,
   },
   data() {
     const id = lspi.get('id') || new Date().getTime();
@@ -45,7 +46,7 @@ export default {
       sub ? this.updatePlayerData(sub) : this.updatePlayerData(pub);
     });
 
-    this.socket.sub({ body: { key: '1' } });
+    this.socket.sub({ body: { key: 1 } });
   },
   methods: {
     createPlayer() {
@@ -55,7 +56,15 @@ export default {
         y: Math.random() * 100,
       };
     },
-    updatePlayerData({ data: { players = [] } }) {
+    updatePlayerData({ data }) {
+      let players;
+
+      if (!data) {
+        players = [];
+      } else {
+        players = data.players;
+      }
+
       const id = this.id;
       const me = players.find(pl => pl.id === id);
 
@@ -66,7 +75,7 @@ export default {
 
         this.socket.pub({
           body: {
-            key: '1',
+            key: 1,
             data: {
               players,
             },
@@ -113,7 +122,7 @@ export default {
 
         this.socket.pub({
           body: {
-            key: '1',
+            key: 1,
             data: {
               players,
             },

@@ -1,28 +1,39 @@
 <template>
   <svg class="player" :style="ratioStyle" width="60" height="60" viewBox="1 10 78 58">
-    <polygon :points="points"></polygon>
+    <polygon :style="polygonStyle" :points="points"></polygon>
   </svg>
 </template>
 
 <script>
 import { TweenLite } from 'gsap/TweenLite';
 
-const Players = {
+const Player = {
   name: 'player',
   props: {
     player: {
       required: true,
       type: Object,
     },
+    myId: {
+      required: true,
+      type: Number,
+    },
   },
   data() {
     const defaultSides = 40;
     const stats = Array.from({ length: defaultSides }, () => 100);
 
+    const fill = this.player.id === this.myId ? 'cyan' : 'lightcoral';
+
+    const polygonStyle = {
+      fill,
+    };
+
     return {
-      stats: stats,
+      stats,
       points: generatePoints(stats),
       sides: defaultSides,
+      polygonStyle,
       minRadius: 15,
       interval: null,
       updateInterval: 300,
@@ -38,6 +49,7 @@ const Players = {
       };
     },
   },
+  polygonStyle() {},
   watch: {
     sides(newSides, oldSides) {
       const sidesDifference = newSides - oldSides;
@@ -111,12 +123,13 @@ function generatePoints(stats) {
     .join(' ');
 }
 
-export default Players;
+export default Player;
 </script>
 
 <style scoped=true>
 svg {
   display: inline-block;
+  border-radius: 50px;
 }
 
 polygon {
