@@ -16,12 +16,12 @@
 <script>
 import lspi from 'lspi';
 import Handler from './sockets';
-import Players from './components/Players.vue'
+import Players from './components/Players.vue';
 
 export default {
   name: 'app',
   components: {
-    Players
+    Players,
   },
   data() {
     const id = lspi.get('id') || new Date().getTime();
@@ -29,7 +29,7 @@ export default {
     lspi.set('id', id);
 
     const socket = new Handler();
-    
+
     socket.channel.join();
 
     return {
@@ -39,7 +39,7 @@ export default {
     };
   },
   created() {
-    window.addEventListener('keydown', (e) => this.handleKeyMoves(e));
+    window.addEventListener('keydown', e => this.handleKeyMoves(e));
 
     this.socket.onSub(({ sub, pub }) => {
       this.handleSubStream(sub);
@@ -52,8 +52,8 @@ export default {
     createPlayer() {
       return {
         id: this.id,
-        x: (Math.random() * 100),
-        y: (Math.random() * 100),
+        x: Math.random() * 100,
+        y: Math.random() * 100,
       };
     },
     updatePlayerData({ data: { players = [] } }) {
@@ -69,11 +69,11 @@ export default {
             data: {
               players: this.players,
             },
-          }
+          },
         });
       } else {
         this.$nextTick(() => {
-          this.players = players.map(pl => pl.id === id ? me : pl)
+          this.players = players.map(pl => (pl.id === id ? me : pl));
         });
       }
     },
@@ -87,7 +87,7 @@ export default {
               data: {
                 players: [this.createPlayer()],
               },
-            }
+            },
           });
         } else {
           this.updatePlayerData(sub);
@@ -105,7 +105,7 @@ export default {
               data: {
                 players: [this.createPlayer()],
               },
-            }
+            },
           });
         }
       }
@@ -132,7 +132,7 @@ export default {
           break;
       }
 
-     const { players } = this;
+      const { players } = this;
 
       this.socket.pub({
         body: {
@@ -140,7 +140,7 @@ export default {
           data: {
             players,
           },
-        }
+        },
       });
     },
   },

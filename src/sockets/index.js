@@ -1,11 +1,11 @@
-import { Socket } from 'phoenix';
+import { Socket } from "phoenix";
 
-const PUB = 'game_pub';
-const SUB = 'game_sub';
+const PUB = "game_pub";
+const SUB = "game_sub";
 
 export default class Handler {
-  constructor(channel = 'room:game') {
-    const socket = new Socket('ws://localhost:4000/socket', {});
+  constructor(channel = "room:game") {
+    const socket = new Socket("ws://localhost:4000/socket", {});
 
     socket.connect();
 
