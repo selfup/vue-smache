@@ -2,13 +2,14 @@
   <div>
       <div class="img-wrapper">
         <img
-          src="https://unsplash.it/960/600"
+          src="https://unsplash.it/600/600"
         />
         <Player
           v-for="player in players"
           :key="player.id"
           :player="player"
           :myId="id"
+          :collision="player.id === id ? collision : false"
         />
       </div>
     </div>
@@ -37,6 +38,7 @@ export default {
       id,
       socket,
       players: [],
+      collision: false,
     };
   },
   created() {
@@ -82,19 +84,36 @@ export default {
           },
         });
       } else {
-        this.$nextTick(() => {
-          const entities = players.filter(pl => pl.id !== id);
+        this.collision = false;
+        this.players.forEach(pl => {
+          if (pl.id === me.id) {
+            return null;
+          }
 
-          entities.push(me);
+          const dx = me.x - pl.x;
+          const dy = me.y - pl.y;
 
-          this.players = entities;
+          const radius = 10;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < radius) {
+            this.collision = true;
+          }
         });
+
+        const entities = players.filter(pl => pl.id !== id);
+
+        entities.push(me);
+
+        this.players = entities;
       }
     },
     handleKeyMoves({ keyCode }) {
       requestAnimationFrame(() => {
         if (keyCode < 37 || keyCode > 40) {
           return null;
+        } else {
+          this.collision = false;
         }
 
         const horizontalVelocity = 0.5;

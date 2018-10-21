@@ -18,6 +18,11 @@ const Player = {
       required: true,
       type: Number,
     },
+    collision: {
+      required: false,
+      default: false,
+      type: Boolean,
+    },
   },
   data() {
     const defaultSides = 40;
@@ -43,7 +48,12 @@ const Player = {
     ratioStyle() {
       const { player } = this;
 
+      const randomColor =
+        '#' + Math.floor(Math.random() * 16777215).toString(16) + 'f0';
+      const backgroundColor = this.collision ? randomColor : '';
+
       return {
+        backgroundColor,
         left: `${player.x}%`,
         top: `${player.y}%`,
       };
