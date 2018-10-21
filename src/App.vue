@@ -1,18 +1,18 @@
 <template>
   <div>
-      <div class="img-wrapper">
-        <img
-          src="https://unsplash.it/400/400"
-        />
-        <Player
-          v-for="player in players"
-          :key="player.id"
-          :player="player"
-          :myId="id"
-          :collision="player.id === id ? collision : false"
-        />
-      </div>
+    <div class="img-wrapper">
+      <img
+        src="https://unsplash.it/400/400"
+      />
+      <Player
+        v-for="player in players"
+        :key="player.id"
+        :player="player"
+        :myId="id"
+        :collision="player.id === id ? collision : false"
+      />
     </div>
+  </div>
 </template>
 
 <script>
@@ -20,7 +20,7 @@ import _each from 'lodash/each';
 import lspi from 'lspi';
 import Handler from './sockets';
 import Player from './components/Player.vue';
-import { keyFuncs } from './movement/player';
+import { keyFuncs, keyMap } from './movement/player';
 
 export default {
   name: 'app',
@@ -34,18 +34,18 @@ export default {
 
     const socket = new Handler();
 
-    socket.channel.join();
-
     return {
       id,
       socket,
-      players: [],
-      keyMap: {},
+      keyMap,
       keyFuncs,
+      players: [],
       collision: false,
     };
   },
   created() {
+    this.socket.channel.join();
+
     window.addEventListener('keydown', e => this.handleDownKeys(e));
     window.addEventListener('keyup', e => this.handleUpKeys(e));
 
