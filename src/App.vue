@@ -100,7 +100,7 @@ export default {
         this.handlePositioning(id, me, players);
       }
     },
-    handlePositioning(id, me, players) {
+    playerCollisionDetection(me) {
       this.collision = false;
 
       this.players.forEach(pl => {
@@ -118,6 +118,9 @@ export default {
           this.collision = true;
         }
       });
+    },
+    handlePositioning(id, me, players) {
+      this.playerCollisionDetection(me);
 
       const entities = players.filter(pl => pl.id !== id);
 
@@ -125,11 +128,7 @@ export default {
 
       this.players = entities;
     },
-    handleMovement(e) {
-      if (e.keyCode < 37 || e.keyCode > 40) {
-        return null;
-      }
-
+    handleMovement() {
       const { me } = this.findIdAndSelf(this.players);
 
       _each(this.keyMap, (keyValue, keyNumber) => {
@@ -141,12 +140,12 @@ export default {
     handleUpKeys(e) {
       this.keyMap[e.keyCode] = false;
 
-      this.handleMovement(e);
+      this.handleMovement();
     },
     handleDownKeys(e) {
       this.keyMap[e.keyCode] = true;
 
-      this.handleMovement(e);
+      this.handleMovement();
 
       this.socket.pub({
         body: {
