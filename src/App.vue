@@ -2,7 +2,7 @@
   <div>
       <div class="img-wrapper">
         <img
-          src="https://unsplash.it/600/600"
+          src="https://unsplash.it/400/400"
         />
         <Player
           v-for="player in players"
@@ -16,9 +16,11 @@
 </template>
 
 <script>
+import _each from 'lodash/each';
 import lspi from 'lspi';
 import Handler from './sockets';
 import Player from './components/Player.vue';
+import { keyFuncs } from './movement/player';
 
 export default {
   name: 'app',
@@ -38,11 +40,14 @@ export default {
       id,
       socket,
       players: [],
+      keyMap: {},
+      keyFuncs,
       collision: false,
     };
   },
   created() {
-    window.addEventListener('keydown', e => this.handleKeyMoves(e));
+    window.addEventListener('keydown', e => this.handleDownKeys(e));
+    window.addEventListener('keyup', e => this.handleUpKeys(e));
 
     this.socket.onSub(({ sub, pub }) => {
       sub ? this.updatePlayerData(sub) : this.updatePlayerData(pub);
@@ -58,6 +63,15 @@ export default {
         y: Math.random() * 100,
       };
     },
+    findIdAndSelf(players) {
+      const id = this.id;
+      const me = players.find(pl => pl.id === id);
+
+      return {
+        id,
+        me,
+      };
+    },
     updatePlayerData({ data }) {
       let players;
 
@@ -67,8 +81,7 @@ export default {
         players = data.players;
       }
 
-      const id = this.id;
-      const me = players.find(pl => pl.id === id);
+      const { id, me } = this.findIdAndSelf(players);
 
       if (!me) {
         players.push(this.createPlayer());
@@ -84,69 +97,64 @@ export default {
           },
         });
       } else {
-        this.collision = false;
-        this.players.forEach(pl => {
-          if (pl.id === me.id) {
-            return null;
-          }
-
-          const dx = me.x - pl.x;
-          const dy = me.y - pl.y;
-
-          const radius = 10;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < radius) {
-            this.collision = true;
-          }
-        });
-
-        const entities = players.filter(pl => pl.id !== id);
-
-        entities.push(me);
-
-        this.players = entities;
+        this.handlePositioning(id, me, players);
       }
     },
-    handleKeyMoves({ keyCode }) {
-      requestAnimationFrame(() => {
-        if (keyCode < 37 || keyCode > 40) {
+    handlePositioning(id, me, players) {
+      this.collision = false;
+
+      this.players.forEach(pl => {
+        if (pl.id === me.id) {
           return null;
-        } else {
-          this.collision = false;
         }
 
-        const horizontalVelocity = 0.5;
-        const verticalVelocity = 0.9;
+        const dx = me.x - pl.x;
+        const dy = me.y - pl.y;
 
-        const id = this.id;
-        const me = this.players.find(pl => pl.id === id);
+        const radius = 10;
+        const distance = Math.sqrt(dx * dx + dy * dy);
 
-        switch (keyCode) {
-          case 37:
-            me.x -= horizontalVelocity;
-            break;
-          case 38:
-            me.y -= verticalVelocity;
-            break;
-          case 39:
-            me.x += horizontalVelocity;
-            break;
-          case 40:
-            me.y += verticalVelocity;
-            break;
+        if (distance < radius) {
+          this.collision = true;
         }
+      });
 
-        const { players } = this;
+      const entities = players.filter(pl => pl.id !== id);
 
-        this.socket.pub({
-          body: {
-            key: 1,
-            data: {
-              players,
-            },
+      entities.push(me);
+
+      this.players = entities;
+    },
+    handleMovement(e) {
+      if (e.keyCode < 37 || e.keyCode > 40) {
+        return null;
+      }
+
+      const { me } = this.findIdAndSelf(this.players);
+
+      _each(this.keyMap, (keyValue, keyNumber) => {
+        if (keyValue) {
+          this.keyFuncs(me, keyNumber);
+        }
+      });
+    },
+    handleUpKeys(e) {
+      this.keyMap[e.keyCode] = false;
+
+      this.handleMovement(e);
+    },
+    handleDownKeys(e) {
+      this.keyMap[e.keyCode] = true;
+
+      this.handleMovement(e);
+
+      this.socket.pub({
+        body: {
+          key: 1,
+          data: {
+            players: this.players,
           },
-        });
+        },
       });
     },
   },
