@@ -18,6 +18,8 @@ function keyFuncMap(me) {
   };
 }
 
+export const keyMap = {};
+
 export function keyFuncs(me, code) {
   const result = keyFuncMap(me)[code];
 
